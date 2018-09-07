@@ -11,8 +11,11 @@ import scala.scalajs.js.annotation.JSGlobal
 @js.native
 trait ChartDataset extends js.Object {
   def label: String = js.native
+
   def data: js.Array[Double] = js.native
+
   def fillColor: String = js.native
+
   def strokeColor: String = js.native
 }
 
@@ -31,6 +34,7 @@ object ChartDataset {
 @js.native
 trait ChartData extends js.Object {
   def labels: js.Array[String] = js.native
+
   def datasets: js.Array[ChartDataset] = js.native
 }
 
@@ -59,7 +63,9 @@ object ChartOptions {
 @js.native
 trait ChartConfiguration extends js.Object {
   def `type`: String = js.native
+
   def data: ChartData = js.native
+
   def options: ChartOptions = js.native
 }
 
@@ -80,15 +86,6 @@ class JSChart(ctx: js.Dynamic, config: ChartConfiguration) extends js.Object
 
 object Chart {
 
-  // available chart styles
-  sealed trait ChartStyle
-
-  case object LineChart extends ChartStyle
-
-  case object BarChart extends ChartStyle
-
-  case class ChartProps(name: String, style: ChartStyle, data: ChartData, width: Int = 500, height: Int = 300)
-
   val Chart = ScalaComponent.builder[ChartProps]("Chart")
     .render_P(p =>
       <.canvas(VdomAttr("width") := p.width, VdomAttr("height") := p.height)
@@ -105,4 +102,13 @@ object Chart {
     }).build
 
   def apply(props: ChartProps) = Chart(props)
+
+  // available chart styles
+  sealed trait ChartStyle
+
+  case class ChartProps(name: String, style: ChartStyle, data: ChartData, width: Int = 500, height: Int = 300)
+
+  case object LineChart extends ChartStyle
+
+  case object BarChart extends ChartStyle
 }

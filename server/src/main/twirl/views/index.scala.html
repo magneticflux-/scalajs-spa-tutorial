@@ -1,5 +1,6 @@
 @(title: String)(implicit config: play.api.Configuration, env: play.api.Environment)
-@import views.html.tags._
+
+@import views.html.tags._asset
 
 <!DOCTYPE html>
 
@@ -14,6 +15,10 @@
     <body>
         <div id="root">
         </div>
-        @scalajs.html.scripts(projectName = "client", name => _asset(name).toString, name => getClass.getResource(s"/public/$name") != null)
+        @scalajs.html.scripts(
+            projectName = "client",
+            name => _asset(name).toString,
+            name => getClass.getResource(s"/public/$name") != null
+        )
     </body>
 </html>

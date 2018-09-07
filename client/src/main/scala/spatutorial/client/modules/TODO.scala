@@ -1,19 +1,28 @@
 package spatutorial.client.modules
 
+import diode.data.Pot
 import diode.react.ReactPot._
 import diode.react._
-import diode.data.Pot
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
+import scalacss.ScalaCssReact._
 import spatutorial.client.components.Bootstrap._
 import spatutorial.client.components._
 import spatutorial.client.logger._
 import spatutorial.client.services._
 import spatutorial.shared._
 
-import scalacss.ScalaCssReact._
-
 object Todo {
+
+  // create the React component for To Do management
+  val component = ScalaComponent.builder[Props]("TODO")
+    .initialState(State()) // initial state from TodoStore
+    .renderBackend[Backend]
+    .componentDidMount(scope => scope.backend.mounted(scope.props))
+    .build
+
+  /** Returns a function compatible with router location system while using our own props */
+  def apply(proxy: ModelProxy[Pot[Todos]]) = component(Props(proxy))
 
   case class Props(proxy: ModelProxy[Pot[Todos]])
 
@@ -21,11 +30,23 @@ object Todo {
 
   class Backend($: BackendScope[Props, State]) {
     def mounted(props: Props) =
-      // dispatch a message to refresh the todos, which will cause TodoStore to fetch todos from the server
+    // dispatch a message to refresh the todos, which will cause TodoStore to fetch todos from the server
       Callback.when(props.proxy().isEmpty)(props.proxy.dispatchCB(RefreshTodos))
 
+    def render(p: Props, s: State) =
+      Panel(Panel.Props("What needs to be done"), <.div(
+        p.proxy().renderFailed(ex => "Error loading"),
+        p.proxy().renderPending(_ > 500, _ => "Loading..."),
+        p.proxy().render(todos => TodoList(todos.items, item => p.proxy.dispatchCB(UpdateTodo(item)),
+          item => editTodo(Some(item)), item => p.proxy.dispatchCB(DeleteTodo(item)))),
+        Button(Button.Props(editTodo(None)), Icon.plusSquare, " New")),
+        // if the dialog is open, add it to the panel
+        if (s.showTodoForm) TodoForm(TodoForm.Props(s.selectedItem, todoEdited))
+        else // otherwise add an empty placeholder
+          VdomArray.empty())
+
     def editTodo(item: Option[TodoItem]) =
-      // activate the edit dialog
+    // activate the edit dialog
       $.modState(s => s.copy(selectedItem = item, showTodoForm = true))
 
     def todoEdited(item: TodoItem, cancelled: Boolean) = {
@@ -39,32 +60,17 @@ object Todo {
       // hide the edit dialog, chain callbacks
       cb >> $.modState(s => s.copy(showTodoForm = false))
     }
-
-    def render(p: Props, s: State) =
-      Panel(Panel.Props("What needs to be done"), <.div(
-        p.proxy().renderFailed(ex => "Error loading"),
-        p.proxy().renderPending(_ > 500, _ => "Loading..."),
-        p.proxy().render(todos => TodoList(todos.items, item => p.proxy.dispatchCB(UpdateTodo(item)),
-          item => editTodo(Some(item)), item => p.proxy.dispatchCB(DeleteTodo(item)))),
-        Button(Button.Props(editTodo(None)), Icon.plusSquare, " New")),
-        // if the dialog is open, add it to the panel
-        if (s.showTodoForm) TodoForm(TodoForm.Props(s.selectedItem, todoEdited))
-        else // otherwise add an empty placeholder
-          VdomArray.empty())
   }
-
-  // create the React component for To Do management
-  val component = ScalaComponent.builder[Props]("TODO")
-    .initialState(State()) // initial state from TodoStore
-    .renderBackend[Backend]
-    .componentDidMount(scope => scope.backend.mounted(scope.props))
-    .build
-
-  /** Returns a function compatible with router location system while using our own props */
-  def apply(proxy: ModelProxy[Pot[Todos]]) = component(Props(proxy))
 }
 
 object TodoForm {
+  val component = ScalaComponent.builder[Props]("TodoForm")
+    .initialStateFromProps(p => State(p.item.getOrElse(TodoItem("", 0, "", TodoNormal, completed = false))))
+    .renderBackend[Backend]
+    .build
+
+  def apply(props: Props) = component(props)
+
   // shorthand for styles
   @inline private def bss = GlobalStyles.bootstrapStyles
 
@@ -73,31 +79,6 @@ object TodoForm {
   case class State(item: TodoItem, cancelled: Boolean = true)
 
   class Backend(t: BackendScope[Props, State]) {
-    def submitForm(): Callback = {
-      // mark it as NOT cancelled (which is the default)
-      t.modState(s => s.copy(cancelled = false))
-    }
-
-    def formClosed(state: State, props: Props): Callback =
-      // call parent handler with the new item and whether form was OK or cancelled
-      props.submitHandler(state.item, state.cancelled)
-
-    def updateDescription(e: ReactEventFromInput) = {
-      val text = e.target.value
-      // update TodoItem content
-      t.modState(s => s.copy(item = s.item.copy(content = text)))
-    }
-
-    def updatePriority(e: ReactEventFromInput) = {
-      // update TodoItem priority
-      val newPri = e.currentTarget.value match {
-        case p if p == TodoHigh.toString => TodoHigh
-        case p if p == TodoNormal.toString => TodoNormal
-        case p if p == TodoLow.toString => TodoLow
-      }
-      t.modState(s => s.copy(item = s.item.copy(priority = newPri)))
-    }
-
     def render(p: Props, s: State) = {
       log.debug(s"User is ${if (s.item.id == "") "adding" else "editing"} a todo or two")
       val headerText = if (s.item.id == "") "Add new todo" else "Edit todo"
@@ -123,12 +104,30 @@ object TodoForm {
         )
       )
     }
+
+    def submitForm(): Callback = {
+      // mark it as NOT cancelled (which is the default)
+      t.modState(s => s.copy(cancelled = false))
+    }
+
+    def formClosed(state: State, props: Props): Callback =
+    // call parent handler with the new item and whether form was OK or cancelled
+      props.submitHandler(state.item, state.cancelled)
+
+    def updateDescription(e: ReactEventFromInput) = {
+      val text = e.target.value
+      // update TodoItem content
+      t.modState(s => s.copy(item = s.item.copy(content = text)))
+    }
+
+    def updatePriority(e: ReactEventFromInput) = {
+      // update TodoItem priority
+      val newPri = e.currentTarget.value match {
+        case p if p == TodoHigh.toString => TodoHigh
+        case p if p == TodoNormal.toString => TodoNormal
+        case p if p == TodoLow.toString => TodoLow
+      }
+      t.modState(s => s.copy(item = s.item.copy(priority = newPri)))
+    }
   }
-
-  val component = ScalaComponent.builder[Props]("TodoForm")
-    .initialStateFromProps(p => State(p.item.getOrElse(TodoItem("", 0, "", TodoNormal, completed = false))))
-    .renderBackend[Backend]
-    .build
-
-  def apply(props: Props) = component(props)
 }

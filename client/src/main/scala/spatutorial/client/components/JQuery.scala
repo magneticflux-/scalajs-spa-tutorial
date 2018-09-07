@@ -17,11 +17,12 @@ trait JQueryEventObject extends Event {
 @js.native
 @JSGlobal("jQuery")
 object JQueryStatic extends js.Object {
-  def apply(element: Element): JQuery = js.native
+  def apply(element: Either[Text, Element]): JQuery = js.native
 }
 
 @js.native
 trait JQuery extends js.Object {
   def on(events: String, selector: js.Any, data: js.Any, handler: js.Function1[JQueryEventObject, js.Any]): JQuery = js.native
+
   def off(events: String): JQuery = js.native
 }

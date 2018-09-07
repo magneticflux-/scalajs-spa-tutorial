@@ -80,6 +80,7 @@ object SPACircuitTests extends TestSuite {
 
     'MotdHandler - {
       val model: Pot[String] = Ready("Message of the Day!")
+
       def build = new MotdHandler(new RootModelRW(model))
 
       'UpdateMotd - {

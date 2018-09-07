@@ -9,13 +9,8 @@ import spatutorial.client.SPAMain.{Loc, TodoLoc}
 import spatutorial.client.components._
 
 import scala.util.Random
-import scala.language.existentials
 
 object Dashboard {
-
-  case class Props(router: RouterCtl[Loc], proxy: ModelProxy[Pot[String]])
-
-  case class State(motdWrapper: ReactConnectProxy[Pot[String]])
 
   // create dummy data for the chart
   val cp = Chart.ChartProps(
@@ -26,7 +21,6 @@ object Dashboard {
       Seq(ChartDataset(Iterator.continually(Random.nextDouble() * 10).take(10).toSeq, "Data1"))
     )
   )
-
   // create the React component for Dashboard
   private val component = ScalaComponent.builder[Props]("Dashboard")
     // create and store the connect proxy in state for later use
@@ -44,4 +38,8 @@ object Dashboard {
     .build
 
   def apply(router: RouterCtl[Loc], proxy: ModelProxy[Pot[String]]) = component(Props(router, proxy))
+
+  case class Props(router: RouterCtl[Loc], proxy: ModelProxy[Pot[String]])
+
+  case class State(motdWrapper: ReactConnectProxy[Pot[String]])
 }

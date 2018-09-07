@@ -2,24 +2,15 @@ package spatutorial.client.components
 
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
-import spatutorial.client.components.Bootstrap.{CommonStyle, Button}
-import spatutorial.shared._
 import scalacss.ScalaCssReact._
+import spatutorial.client.components.Bootstrap.{Button, CommonStyle}
+import spatutorial.shared._
 
 object TodoList {
-  // shorthand for styles
-  @inline private def bss = GlobalStyles.bootstrapStyles
-
-  case class TodoListProps(
-    items: Seq[TodoItem],
-    stateChange: TodoItem => Callback,
-    editItem: TodoItem => Callback,
-    deleteItem: TodoItem => Callback
-  )
-
   private val TodoList = ScalaComponent.builder[TodoListProps]("TodoList")
     .render_P(p => {
       val style = bss.listGroup
+
       def renderItem(item: TodoItem) = {
         // convert priority into Bootstrap style
         val itemStyle = item.priority match {
@@ -35,10 +26,21 @@ object TodoList {
           Button(Button.Props(p.deleteItem(item), addStyles = Seq(bss.pullRight, bss.buttonXS)), "Delete")
         )
       }
+
       <.ul(style.listGroup)(p.items toTagMod renderItem)
     })
     .build
 
   def apply(items: Seq[TodoItem], stateChange: TodoItem => Callback, editItem: TodoItem => Callback, deleteItem: TodoItem => Callback) =
     TodoList(TodoListProps(items, stateChange, editItem, deleteItem))
+
+  // shorthand for styles
+  @inline private def bss = GlobalStyles.bootstrapStyles
+
+  case class TodoListProps(
+                            items: Seq[TodoItem],
+                            stateChange: TodoItem => Callback,
+                            editItem: TodoItem => Callback,
+                            deleteItem: TodoItem => Callback
+                          )
 }
