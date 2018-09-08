@@ -93,6 +93,7 @@ private[logger] class AjaxAppender(url: String) extends Appender {
 
 @js.native
 @js.annotation.JSGlobalScope
+//@JSImport("log4javascript", JSImport.Default)
 private[logger] object Log4JavaScript extends js.Object {
   val log4javascript: Log4JavaScript = js.native
 }
@@ -107,13 +108,6 @@ class L4JSLogger(jsLogger: JSLogger) extends Logger {
 
   override def debug(msg: String, e: Exception): Unit = jsLogger.debug(msg, undefOrError(e))
 
-  private def undefOrError(e: Exception): js.UndefOr[js.Error] = {
-    if (e == null)
-      js.undefined
-    else
-      e.asInstanceOf[js.Error]
-  }
-
   override def debug(msg: String): Unit = jsLogger.debug(msg)
 
   override def info(msg: String, e: Exception): Unit = jsLogger.info(msg, undefOrError(e))
@@ -125,6 +119,13 @@ class L4JSLogger(jsLogger: JSLogger) extends Logger {
   override def warn(msg: String): Unit = jsLogger.warn(msg)
 
   override def error(msg: String, e: Exception): Unit = jsLogger.error(msg, undefOrError(e))
+
+  private def undefOrError(e: Exception): js.UndefOr[js.Error] = {
+    if (e == null)
+      js.undefined
+    else
+      e.asInstanceOf[js.Error]
+  }
 
   override def error(msg: String): Unit = jsLogger.error(msg)
 

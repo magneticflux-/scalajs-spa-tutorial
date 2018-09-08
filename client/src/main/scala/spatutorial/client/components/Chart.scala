@@ -1,8 +1,9 @@
 package spatutorial.client.components
 
 import japgolly.scalajs.react.vdom.html_<^._
-import japgolly.scalajs.react.{Callback, ScalaComponent}
+import japgolly.scalajs.react.{Callback, ScalaComponent, _}
 import org.scalajs.dom.raw.HTMLCanvasElement
+import spatutorial.client.logger.log
 
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
@@ -80,8 +81,8 @@ object ChartConfiguration {
 }
 
 // define a class to access the Chart.js component
-@js.native
 @JSGlobal("Chart")
+@js.native
 class JSChart(ctx: js.Dynamic, config: ChartConfiguration) extends js.Object
 
 object Chart {
@@ -92,14 +93,20 @@ object Chart {
     )
     .componentDidMount(scope => Callback {
       // access context of the canvas
-      val ctx = scope.getDOMNode.asInstanceOf[HTMLCanvasElement].getContext("2d")
+      val ctx = scope.getDOMNode.asElement.asInstanceOf[HTMLCanvasElement].getContext("2d")
       // create the actual chart using the 3rd party component
       scope.props.style match {
-        case LineChart => new JSChart(ctx, ChartConfiguration("line", scope.props.data))
-        case BarChart => new JSChart(ctx, ChartConfiguration("bar", scope.props.data))
+        case LineChart => /*new JSChart*/
+          js.Dynamic.literal(item = ctx, config = ChartConfiguration("line", scope.props.data))
+        case BarChart => /*new JSChart*/
+          js.Dynamic.literal(item = ctx, config = ChartConfiguration("bar", scope.props.data))
         case _ => throw new IllegalArgumentException
       }
-    }).build
+    })
+    .componentDidCatch(cdc => Callback {
+      log.error(cdc.info.toString)
+    })
+    .build
 
   def apply(props: ChartProps) = Chart(props)
 
@@ -111,4 +118,5 @@ object Chart {
   case object LineChart extends ChartStyle
 
   case object BarChart extends ChartStyle
+
 }

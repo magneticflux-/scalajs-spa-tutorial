@@ -9,7 +9,7 @@ lazy val shared = (crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pur
     libraryDependencies ++= Settings.sharedDependencies.value
   )
   // set up settings specific to the JS project
-  .jsConfigure(_ enablePlugins ScalaJSWeb)
+  .jsConfigure(_.enablePlugins(ScalaJSWeb, ScalaJSBundlerPlugin))
 
 lazy val sharedJVM = shared.jvm.settings(name := "sharedJVM")
 
@@ -31,9 +31,14 @@ lazy val client: Project = (project in file("client"))
     scalacOptions ++= elideOptions.value,
     //jsDependencies ++= Settings.jsDependencies.value,
     //Use npm
-    npmDependencies ++= Seq(
-      "react" -> "15.6.2",
-      "react-dom" -> "15.6.2",
+    npmDependencies in Compile ++= Seq(
+      "log4javascript" -> "1.4.15",
+      "react" -> "16.5.0",
+      "react-dom" -> "16.5.0",
+      "jquery" -> "1.12.4",
+      "popper.js" -> "1.14.4",
+      "bootstrap" -> "4.1.3",
+      "chart.js" -> "2.7.2",
     ),
     // RuntimeDOM is needed for tests
     jsEnv in Test := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv,
@@ -43,7 +48,7 @@ lazy val client: Project = (project in file("client"))
     scalaJSUseMainModuleInitializer := true,
     scalaJSUseMainModuleInitializer in Test := false,
     // use uTest framework for tests
-    testFrameworks += new TestFramework("utest.runner.Framework"),
+    testFrameworks += new TestFramework("utest.runner.Framework")
   )
   .enablePlugins(ScalaJSPlugin, ScalaJSWeb, ScalaJSBundlerPlugin)
   .dependsOn(sharedJS)
@@ -68,7 +73,7 @@ lazy val server = (project in file("server"))
     pipelineStages := Seq(digest, gzip),
     libraryDependencies += guice,
     // compress CSS
-    LessKeys.compress in Assets := true
+    //LessKeys.compress in Assets := true
   )
   .enablePlugins(PlayScala, WebScalaJSBundlerPlugin)
   .disablePlugins(PlayLayoutPlugin) // use the standard directory layout instead of Play's custom

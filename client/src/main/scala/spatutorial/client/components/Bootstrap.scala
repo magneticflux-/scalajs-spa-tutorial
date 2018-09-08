@@ -42,6 +42,7 @@ object Bootstrap {
     def apply() = component
 
     case class Props(onClick: Callback, style: CommonStyle.Value = CommonStyle.default, addStyles: Seq[StyleA] = Seq())
+
   }
 
   object Panel {
@@ -59,6 +60,7 @@ object Bootstrap {
     def apply() = component
 
     case class Props(heading: String, style: CommonStyle.Value = CommonStyle.default)
+
   }
 
   object Modal {
@@ -68,9 +70,9 @@ object Bootstrap {
       .componentDidMount(scope => Callback {
         val p = scope.props
         // instruct Bootstrap to show the modal
-        jQuery(scope.getDOMNode).modal(js.Dynamic.literal("backdrop" -> p.backdrop, "keyboard" -> p.keyboard, "show" -> true))
+        jQuery(scope.getDOMNode.asElement).modal(js.Dynamic.literal("backdrop" -> p.backdrop, "keyboard" -> p.keyboard, "show" -> true))
         // register event listener to be notified when the modal is closed
-        jQuery(scope.getDOMNode).on("hidden.bs.modal", null, null, scope.backend.hidden _)
+        jQuery(scope.getDOMNode.asElement).on("hidden.bs.modal", null, null, scope.backend.hidden _)
       })
       .build
 
@@ -104,8 +106,9 @@ object Bootstrap {
 
       def hide =
       // instruct Bootstrap to hide the modal
-        t.getDOMNode.map(jQuery(_).modal("hide")).void
+        t.getDOMNode.map(element => jQuery(element.asElement).modal("hide")).void
     }
+
   }
 
 }

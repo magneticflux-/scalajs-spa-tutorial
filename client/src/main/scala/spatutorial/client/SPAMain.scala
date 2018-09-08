@@ -3,10 +3,8 @@ package spatutorial.client
 import japgolly.scalajs.react.extra.router._
 import japgolly.scalajs.react.vdom.html_<^._
 import org.scalajs.dom
-import scalacss.ScalaCssReact._
 import spatutorial.client.CssSettings._
 import spatutorial.client.components.GlobalStyles
-import spatutorial.client.logger._
 import spatutorial.client.modules._
 import spatutorial.client.services.SPACircuit
 
@@ -30,9 +28,9 @@ object SPAMain {
   def layout(c: RouterCtl[Loc], r: Resolution[Loc]) = {
     <.div(
       // here we use plain Bootstrap class names as these are specific to the top level layout defined here
-      <.nav(^.className := "navbar navbar-inverse navbar-fixed-top",
+      <.nav(^.className := "navbar navbar-expand-lg",
+        <.a(^.className := "navbar-brand", "SPA Tutorials"),
         <.div(^.className := "container",
-          <.div(^.className := "navbar-header", <.span(^.className := "navbar-brand", "SPA Tutorial")),
           <.div(^.className := "collapse navbar-collapse",
             // connect menu to model, because it needs to update when the number of open todos changes
             todoCountWrapper(proxy => MainMenu(c, r.page, proxy))
@@ -46,10 +44,10 @@ object SPAMain {
 
   @JSExportTopLevel("SPAMain.main")
   def main(args: Array[String]): Unit = {
-    log.warn("Application starting")
+    //log.warn("Application starting")
     // send log messages also to the server
-    log.enableServerLogging("/logging")
-    log.info("This message goes to server as well")
+    //log.enableServerLogging("/logging")
+    //log.info("This message goes to server as well")
 
     // create stylesheet
     GlobalStyles.addToDocument()
@@ -65,4 +63,5 @@ object SPAMain {
   case object DashboardLoc extends Loc
 
   case object TodoLoc extends Loc
+
 }

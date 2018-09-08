@@ -1,5 +1,4 @@
 import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
-import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import sbt._
 
 /**
@@ -37,6 +36,7 @@ object Settings {
   ))
   /** Dependencies only used by the JS project (note the use of %%% instead of %%) */
   val scalajsDependencies = Def.setting(Seq(
+    //    "org.scala-js" %%% "scalajs-library" % "1.0.0-M5",
     "com.github.japgolly.scalajs-react" %%% "core" % versions.scalajsReact,
     "com.github.japgolly.scalajs-react" %%% "extra" % versions.scalajsReact,
     "com.github.japgolly.scalacss" %%% "ext-react" % versions.scalaCSS,
@@ -70,7 +70,7 @@ object Settings {
     val diodeReact = "1.1.3.120"
     val uTest = "0.4.8"
 
-    val react = "16.4.2"
+    //val react = "16.4.2"
     val jQuery = "1.12.4"
     val bootstrap = "4.1.3"
     val chartjs = "2.7.2"
